@@ -4,6 +4,7 @@
 
 [build.environment]
   BUN_VERSION = "1.3.11"
+  BUN_PUBLIC_API_URL = "https://worknest-backend-7ep8.onrender.com"
 
 [[redirects]]
   from = "/*"

@@ -2,7 +2,7 @@ import "./index.css";
 import { useEffect, useState, type FormEvent } from "react";
 
 const configuredApi = typeof process !== "undefined" ? process.env.BUN_PUBLIC_API_URL?.trim() : "";
-const API = configuredApi || (window.location.hostname === "localhost" ? "http://localhost:3001" : "/api");
+const API = configuredApi || (window.location.hostname === "localhost" ? "http://localhost:3001" : "https://worknest-backend-7ep8.onrender.com");
 const INVITE_STORAGE_KEY = "workspace-invite-token";
 const AUTH_STORAGE_KEY = "workspace-session-token";
 const THEME_STORAGE_KEY = "workspace-theme";
