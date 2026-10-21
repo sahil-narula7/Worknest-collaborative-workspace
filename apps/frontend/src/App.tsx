@@ -1,9 +1,12 @@
 import "./index.css";
 import { useEffect, useState, type FormEvent } from "react";
 
-const API = process.env.BUN_PUBLIC_API_URL?.trim() || "/api";
+const configuredApi = typeof process !== "undefined" ? process.env.BUN_PUBLIC_API_URL?.trim() : "";
+const API = configuredApi || (window.location.hostname === "localhost" ? "http://localhost:3001" : "/api");
 const INVITE_STORAGE_KEY = "workspace-invite-token";
 const AUTH_STORAGE_KEY = "workspace-session-token";
+const THEME_STORAGE_KEY = "workspace-theme";
+type Theme = "light" | "dark";
 
 type User = { id: string; email: string };
 type Organization = { id: string; name: string; role: "admin" | "member" };
@@ -33,6 +36,7 @@ async function request<T>(path: string, options: RequestInit = {}) {
 }
 
 export function App() {
+  const [theme, setTheme] = useState<Theme>(() => window.localStorage.getItem(THEME_STORAGE_KEY) === "dark" ? "dark" : "light");
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -58,6 +62,11 @@ export function App() {
     if (urlToken) window.localStorage.setItem(INVITE_STORAGE_KEY, urlToken);
     return urlToken ?? window.localStorage.getItem(INVITE_STORAGE_KEY) ?? "";
   });
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
 
   const visibleBoards = boards.filter(board => board.organization_id === organizationId);
   const currentOrganization = organizations.find(organization => organization.id === organizationId);
@@ -576,6 +585,9 @@ export function App() {
             <option value="">Choose board</option>
             {visibleBoards.map(board => <option key={board.id} value={board.id}>{board.title}</option>)}
           </select>
+          <button className="theme-button" type="button" onClick={() => setTheme(current => current === "light" ? "dark" : "light")} aria-label={`Switch to ${theme === "light" ? "dark" : "light"} theme`} title={`Switch to ${theme === "light" ? "dark" : "light"} theme`}>
+            {theme === "light" ? "☾ Dark" : "☀ Light"}
+          </button>
           <button className="settings-button" type="button" onClick={() => setSettingsOpen(current => !current)} aria-label="Open organization settings" title="Organization settings">⚙ Settings</button>
           <button className="logout-button" type="button" onClick={() => void logout()}>Log out</button>
         </div>
@@ -599,10 +611,14 @@ export function App() {
       )}
 
       <section className="workspace-tools">
-        <button className="settings-button" type="button" onClick={() => setOrganizationFormOpen(current => !current)}>+ New organization</button>
+        <div className="tool-card organization-tool">
+          <p className="tool-kicker">Workspace</p>
+          <button className="settings-button" type="button" onClick={() => setOrganizationFormOpen(current => !current)}>+ New organization</button>
+        </div>
 
         {organizationFormOpen && (
-          <form className="new-column-form organization-form" onSubmit={createOrganization}>
+          <form className="tool-card new-column-form organization-form" onSubmit={createOrganization}>
+            <p className="tool-kicker">New organization</p>
             <input name="name" placeholder="Organization name" required />
             <input name="description" placeholder="Description" />
             <button type="submit">Create</button>
@@ -610,20 +626,22 @@ export function App() {
         )}
 
         {currentOrganization?.role === "admin" && (
-          <form className="new-column-form board-form" onSubmit={createBoard}>
+          <form className="tool-card new-column-form board-form" onSubmit={createBoard}>
+            <p className="tool-kicker">New board</p>
             <input name="title" placeholder="New board title" required />
             <button type="submit">Create board</button>
           </form>
         )}
 
         {boardId && (
-          <form className="new-column-form section-form" onSubmit={createSection}>
+          <form className="tool-card new-column-form section-form" onSubmit={createSection}>
+            <p className="tool-kicker">New section</p>
             <input name="title" placeholder="New section title" required />
             <button type="submit">Add section</button>
           </form>
         )}
 
-        {boardId && currentOrganization?.role === "admin" && <button className="danger-button" type="button" onClick={() => void deleteBoard()}>Delete board</button>}
+        {boardId && currentOrganization?.role === "admin" && <div className="tool-card danger-tool"><p className="tool-kicker">Board actions</p><button className="danger-button" type="button" onClick={() => void deleteBoard()}>Delete board</button></div>}
 
         <div className="board-grid">
           {sections.map(section => (

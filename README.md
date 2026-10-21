@@ -15,6 +15,7 @@ A Trello-style collaborative workspace built with React, Bun, SQLite, and Turbor
 - Admin notifications for new accounts
 - Board-specific access grants and removals
 - Local SQLite persistence
+- Persistent light and dark themes
 - Responsive desktop, tablet, and mobile UI
 
 ## Project structure
@@ -42,6 +43,8 @@ bun run dev
 ```
 
 Open `http://localhost:3000`. The frontend runs on port `3000` and proxies `/api` requests to the backend on port `3001`. The backend creates `apps/backend/app.sqlite` automatically. SQLite files are ignored by Git.
+
+Use the theme button in the workspace header to switch between light and dark mode. The selected theme is saved in the browser for the next visit.
 
 Create the first account from the login page. The first organization created by that account gives the account the `admin` role.
 
