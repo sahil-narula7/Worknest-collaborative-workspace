@@ -84,7 +84,7 @@ Add this environment variable in Netlify:
 BUN_PUBLIC_API_URL=https://your-deployed-backend.example.com
 ```
 
-Deploy the backend first to a Bun-capable host such as Railway, Render, Fly.io, or a VPS. For a Railway deployment, use `apps/backend` as the service root, `bun install` as the install command, and `bun index.ts` as the start command. Set the healthcheck path to `/health`. Attach a persistent volume for SQLite and set `DATABASE_PATH` to its mounted path, such as `/data/app.sqlite`.
+Deploy the backend first on Render using the `render.yaml` blueprint. It uses the Dockerfile in `apps/backend`, starts Bun, and checks `/health`. Set `FRONTEND_ORIGIN` and `APP_URL` to your Netlify URL in Render.
 
 Set these backend production variables:
 
@@ -92,12 +92,14 @@ Set these backend production variables:
 PORT=3001
 FRONTEND_ORIGIN=https://your-site.netlify.app
 APP_URL=https://your-site.netlify.app
-DATABASE_PATH=/data/app.sqlite
+DATABASE_PATH=/tmp/app.sqlite
 COOKIE_SAMESITE=None
 COOKIE_SECURE=true
 ```
 
 Then set Netlify's `BUN_PUBLIC_API_URL` to the public backend URL and deploy the frontend. The Netlify site will be public at the generated `https://your-site.netlify.app` address. Replace the placeholder live-demo URL at the top of this README with that address after deployment.
+
+The free Render filesystem is temporary, so the SQLite database can reset when the service restarts. Use a persistent Render disk or migrate `apps/backend/db.ts` to a hosted PostgreSQL database before relying on this deployment for permanent user data.
 
 ## GitHub
 
